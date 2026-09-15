@@ -61,7 +61,7 @@ def inference( config_name, input_path=None, output_path=None):
     ehm_model.backbone.load_state_dict(_state['backbone'], strict=False)
     ehm_model.head.load_state_dict(_state['head'], strict=False)
     ehm_model = ehm_model.cuda()
-
+    ehm_model.eval()
 
     ehm = EHM_v2( "assets/FLAME", "assets/SMPLX")
     ehm = ehm.cuda()
