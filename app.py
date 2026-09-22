@@ -138,6 +138,7 @@ filename = "pear_model.pt"
 
 ehm_basemodel = hf_hub_download(repo_id=repo_id, filename=filename, repo_type="model")
 ehm_model = Ehm_Pipeline(meta_cfg)
+ehm_model.eval()
 
 _state = torch.load(ehm_basemodel, map_location='cpu', weights_only=True)
 ehm_model.backbone.load_state_dict(_state['backbone'], strict=False)
@@ -382,7 +383,7 @@ def mesh_inference(temp_dir, video_name):
         img_patch = to_tensor(resized,  TORCH_DEVICE)  # (B, C, H, W)
         img_patch =  torch.permute(img_patch/255,(2,0,1)).unsqueeze(0)
 
-        outputs =  ehm_model(img_patch)  # 转移到 cuda 了
+        outputs =  ehm_model(img_patch) 
 
 
         body_sequence.append(outputs['body_param'])
@@ -410,7 +411,7 @@ def mesh_inference(temp_dir, video_name):
     exp = processed1["exp"]
     shape = processed1["shape"]
 
-    # 第二步：从 eye_pose_params 中提取字段并平滑
+    
     fields2 = [
         "eye_pose_params", "pose_params", "jaw_params",
         "eyelid_params", "expression_params", "shape_params"
@@ -418,7 +419,7 @@ def mesh_inference(temp_dir, video_name):
 
     processed2 = {}
     for key in fields2:
-        data_list = [seq[key] for seq in flame_sequence]  # 这里我猜你原意是从 eye_pose_params 取
+        data_list = [seq[key] for seq in flame_sequence]  
         data_tensor = torch.cat(data_list, dim=0)
         processed2[key] = torch.tensor(polynomial_smooth(data_tensor, window_size=5, polyorder=2)).cuda()
 
